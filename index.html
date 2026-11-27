@@ -294,6 +294,12 @@ section[id] { scroll-margin-top: 64px; }
         <div class="panel chart"><h3>Etapa del programa</h3><p class="sub">Número de personas</p><div class="bars" id="ch-etapa"></div></div>
         <div class="panel chart"><h3>¿Para qué usan la IA?</h3><p class="sub">Podían marcar más de una opción · % de las 33 personas</p><div class="bars" id="ch-usos"></div></div>
         <div class="panel chart"><h3>Herramientas que han usado</h3><p class="sub">Podían marcar más de una opción · % de las 33 personas</p><div class="bars" id="ch-herr"></div></div>
+        <div class="panel chart"><h3>¿Con qué frecuencia usan IA?</h3><p class="sub">Número de personas</p><div class="bars" id="ch-frec"></div></div>
+        <div class="panel chart"><h3>¿Cómo verifican lo que dice la IA?</h3><p class="sub">Podían marcar más de una opción · % de las 33 personas</p><div class="bars" id="ch-verif"></div></div>
+        <div class="panel chart"><h3>Temas que querían para el conversatorio</h3><p class="sub">Hasta 3 por persona · % de las 33 personas</p><div class="bars" id="ch-temas"></div></div>
+        <div class="panel chart"><h3>Interés en actividades posteriores</h3><p class="sub">Podían marcar más de una opción · % de las 33 personas</p><div class="bars" id="ch-post"></div></div>
+        <div class="panel chart"><h3>¿Conocen Lean u otros asistentes de demostración?</h3><p class="sub">Número de personas</p><div class="bars" id="ch-lean"></div></div>
+        <div class="panel chart"><h3>Experiencia programando</h3><p class="sub">Número de personas</p><div class="bars" id="ch-progx"></div></div>
         <div class="panel chart chart-wide"><h3>Qué piensan sobre la IA</h3><p class="sub">Nivel de acuerdo con cada afirmación · % de quienes respondieron</p><ul class="lk-legend" id="lk-legend"></ul><div id="ch-likert"></div></div>
       </div>
       <p class="privacy-note">Solo se muestran resultados agregados. No se publican nombres, correos, respuestas abiertas ni datos de alimentación, y los programas y áreas con muy pocas personas se agrupan para que nadie sea identificable.</p>
@@ -345,7 +351,7 @@ section[id] { scroll-margin-top: 64px; }
   <div class="wrap">
     <p><strong>Facultad de Matemáticas · Instituto de Ingeniería Matemática y Computacional · Pontificia Universidad Católica de Chile</strong></p>
     <p>Gracias a Raimundo Briceño, Vicente Fernández, Nicolás Figueroa, Luis Gutiérrez, Mircea Petrache y Cristóbal Rojas, y a todas las personas que participaron.</p>
-    <p>Contacto: Mircea Petrache, <a class="mono" href="mailto:mpetrache@uc.cl">mpetrache@uc.cl</a></p>
+    <p>Contacto: Mircea Petrache, <a class="mono" href="mailto:mpetrache@uc.cl">mpetrache@uc.cl</a> · Víctor Verdugo, <a class="mono" href="mailto:victor.verdugo@uc.cl">victor.verdugo@uc.cl</a></p>
   </div>
 </footer>
 
@@ -354,12 +360,12 @@ section[id] { scroll-margin-top: 64px; }
    type: "pdf" | "html" | "pending" (not yet shared) | "none" (will not be shared)
    url: relative path of a file published with the page (e.g. "slides/figueroa.pdf") or a full https:// link. */
 const SLIDES = [
-  { who: "Nicolás Figueroa",  title: "El impacto de la IA en los mercados laborales y las organizaciones", type: "pending", url: "" },
-  { who: "Luis Gutiérrez",    title: "IA en la inferencia bayesiana: usos y posibilidades de desarrollo", type: "pending", url: "" },
-  { who: "Vicente Fernández", title: "Del otro lado del modelo", type: "pending", url: "" },
+  { who: "Nicolás Figueroa",  title: "El impacto de la IA en los mercados laborales y las organizaciones", type: "pdf", url: "slides/figueroa.pdf" },
+  { who: "Luis Gutiérrez",    title: "IA en la inferencia bayesiana: usos y posibilidades de desarrollo", type: "pdf", url: "slides/gutierrez.pdf" },
+  { who: "Vicente Fernández", title: "Del otro lado del modelo", type: "html", url: "slides/fernandez/index.html" },
   { who: "Raimundo Briceño",  title: "Una breve introducción a Lean", type: "pending", url: "" },
   { who: "Cristóbal Rojas",   title: "Reflexiones y ejemplos sobre el uso de IA en el quehacer académico", type: "pending", url: "" },
-  { who: "Mircea Petrache",   title: "IA, descarga cognitiva, metacognición", type: "pending", url: "" }
+  { who: "Mircea Petrache",   title: "IA, descarga cognitiva, metacognición", type: "pdf", url: "slides/petrache.pdf" }
 ];
 const LABEL = { pdf: "PDF", html: "Interactiva (HTML)", pending: "Por publicar", none: "No disponible" };
 const NOTE = {
@@ -413,6 +419,12 @@ const PART = {
   etapa: [["Primer año",14],["Cursos avanzados",6],["Tesis (etapa inicial)",5],["Tesis (etapa avanzada)",8]],
   usos: [["Entender conceptos o papers",21],["LaTeX",20],["Estudiar o preparar exámenes",17],["Redacción o traducción",17],["Programar",17],["Buscar literatura",16],["Revisar o corregir demostraciones o textos",12],["Preparar docencia",12],["Intentar demostraciones o cálculos",9]],
   herramientas: [["Claude",23],["ChatGPT",21],["Gemini",21],["DeepSeek",11],["Copilot u otra herramienta para código",4],["Versiones pagadas o de razonamiento avanzado",4]],
+  frecuencia: [["A diario",15],["Semanalmente",13],["Alguna vez",4],["Nunca",1]],
+  verificacion: [["Rehago el razonamiento por mi cuenta",27],["Busco la referencia original",19],["Lo pruebo numéricamente o con ejemplos",17],["Lo consulto con mi profesor/a guía o compañeros",8],["Le pregunto a otra IA o le pregunto de nuevo",8],["No verifico",2],["Uso un asistente de demostración (Lean, etc.)",1]],
+  temas: [["Riesgo de no aprender por depender de la IA",15],["Cómo usar IA bien en mi tesis",15],["Futuro laboral académico",14],["Verificación formal y Lean",14],["Qué está permitido y cómo declarar su uso",13],["Oportunidades fuera de la academia",9],["Qué significa «entender» una demostración hecha por IA",7],["Qué puede y qué no puede hacer la IA hoy",6]],
+  posteriores: [["Seminario sobre IA en investigación",19],["Grupo de estudio de Lean y formalización",17],["Grupo de trabajo y discusión sobre IA en investigación",13],["Experimentos o hackathons con IA en investigación",13],["Grupo de trabajo sobre el rol de la matemática post-IA",9],["Grupo de trabajo sobre estilos de uso de IA",6],["No por ahora",2]],
+  lean: [["He oído hablar de ellos",18],["No sé qué son",15]],
+  programacion: [["Básica",8],["Intermedia",19],["Avanzada",6]],
   likertLevels: ["Muy en desacuerdo","En desacuerdo","Neutral","De acuerdo","Muy de acuerdo"],
   likert: [
     { q: "La IA cambiará significativamente el trabajo en matemáticas en los próximos 5 años", c: [0,1,2,7,23] },
@@ -442,6 +454,12 @@ barChart('ch-programa', PART.programa, false);
 barChart('ch-etapa', PART.etapa, false);
 barChart('ch-usos', PART.usos, true);
 barChart('ch-herr', PART.herramientas, true);
+barChart('ch-frec', PART.frecuencia, false);
+barChart('ch-verif', PART.verificacion, true);
+barChart('ch-temas', PART.temas, true);
+barChart('ch-post', PART.posteriores, true);
+barChart('ch-lean', PART.lean, false);
+barChart('ch-progx', PART.programacion, false);
 (function () {
   const leg = document.getElementById('lk-legend'), host = document.getElementById('ch-likert');
   if (!leg || !host) return;

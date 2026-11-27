@@ -1,0 +1,593 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Del otro lado del modelo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Hanken+Grotesk:wght@400;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* ===========================================
+   TEMA: papel crema + una sola tinta cobalto
+   Cambia estas variables para cambiar todo el aspecto
+   =========================================== */
+:root {
+  --paper: #F0EBDE; --ink: #1F2BE0; --ink-soft: #5560E5;
+  --grid: rgba(31, 43, 224, 0.10); --ink-faint: rgba(31, 43, 224, 0.18);
+  --serif: "Newsreader", Georgia, serif; --sans: "Hanken Grotesk", sans-serif; --mono: "DM Mono", ui-monospace, monospace;
+  --edge: 96px; --stage-bg: #15161c; --slide-bg: var(--paper);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===========================================
+   ESCENARIO FIJO 16:9 (base obligatoria)
+   Las diapositivas se diseñan a 1920×1080 y se escalan enteras
+   =========================================== */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+.deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+@media print {
+  html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+  .deck-viewport { position: static; overflow: visible; background: #fff; }
+  .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+  .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+  .slide:last-child { break-after: auto; page-break-after: auto; }
+  .deck-controls, .notes-panel, .progress, .edit-hotzone, .edit-toggle { display: none !important; }
+  .reveal, .step { opacity: 1 !important; transform: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+
+/* ===========================================
+   SUPERFICIE: cuadrícula permanente y marco de filetes
+   =========================================== */
+.slide { color: var(--ink); font-family: var(--sans);
+  background-color: var(--paper);
+  background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px), linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 48px 48px; }
+.chrome { position: absolute; left: var(--edge); right: var(--edge); display: flex; justify-content: space-between; font: 400 20px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.chrome.top { top: 62px; } .chrome.bot { bottom: 62px; }
+.hair { position: absolute; left: var(--edge); right: var(--edge); height: 1.5px; background: var(--ink); }
+.hair.t { top: 104px; } .hair.b { bottom: 104px; }
+.frame { position: absolute; left: var(--edge); right: var(--edge); top: 150px; bottom: 150px; }
+.notes { display: none; }
+
+/* ===========================================
+   TIPOGRAFÍA: serif = afirmación, grotesca = apoyo, mono = cromo
+   =========================================== */
+.hero { font: 400 226px/.9 var(--serif); letter-spacing: -.03em; margin-top: 70px; }
+.closing { font: 400 124px/1 var(--serif); letter-spacing: -.012em; }
+.chapter { font: 400 120px/1 var(--serif); letter-spacing: -.01em; }
+.chapter.sm { font-size: 80px; margin: 14px 0 20px; }
+.statement { font: 400 96px/1.05 var(--serif); letter-spacing: -.01em; }
+.manifesto { font: italic 400 104px/1.08 var(--serif); letter-spacing: -.008em; }
+.manifesto.roman { font-style: normal; }
+.head { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; border-bottom: 1.5px solid var(--ink); padding-bottom: 22px; margin-bottom: 46px; }
+.head h2 { font: 400 88px/.98 var(--serif); letter-spacing: -.012em; }
+.callout { font: 400 54px/1.14 var(--serif); }
+.rowh { font: 400 52px/1.08 var(--serif); }
+.tag { font: 600 21px/1.2 var(--sans); letter-spacing: .16em; text-transform: uppercase; white-space: nowrap; }
+.tag.c { text-align: center; margin-top: 20px; }
+.body { font: 400 32px/1.38 var(--sans); }
+.mono { font: 400 21px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.mono.r { text-align: right; }
+.src { position: absolute; left: 0; bottom: 0; }
+.eq { color: var(--ink); }
+mjx-container[display="true"] { text-align: left !important; margin: 0 !important; }
+mjx-container { outline: none; }
+
+/* ===========================================
+   COMPONENTES
+   =========================================== */
+.cols { display: flex; gap: 84px; } .col.grow { flex: 1; min-width: 0; }
+.inline { display: flex; align-items: center; gap: 40px; margin-top: 64px; }
+.dim { opacity: .45; }
+/* Portada */
+.cover-sub { width: 1040px; margin-top: 58px; } .cover-idx { margin-top: 46px; color: var(--ink-soft); }
+.glitch { position: absolute; top: 28px; width: 360px; height: 704px; } .g-right { right: 0; } .g-left { left: 0; }
+.glitch.slim { width: 250px; top: 40px; }
+.qr { position: absolute; background: var(--paper); box-shadow: 0 0 0 6px var(--paper); }
+/* Matriz de atención como mosaico */
+.attn { display: flex; gap: 20px; margin-top: 6px; }
+.attn-rows { display: grid; grid-template-rows: repeat(6, 82px); gap: 6px; align-items: center; text-align: right; font: 400 22px/1 var(--mono); }
+.attn-grid { display: grid; grid-template-columns: repeat(6, 82px); grid-auto-rows: 82px; gap: 6px; }
+.attn-grid i { display: block; background: var(--ink); } .attn-grid i.off { background: none; box-shadow: inset 0 0 0 1px var(--ink-faint); }
+/* Listas tipo libro mayor */
+.lrow { display: grid; grid-template-columns: 80px 1fr 1.15fr 110px; gap: 30px; align-items: baseline; padding: 28px 0; border-bottom: 1px solid var(--ink-faint); }
+.lrow2 { padding: 28px 0; border-bottom: 1px solid var(--ink-faint); } .col .tag + .lrow2 { border-top: 1.5px solid var(--ink); margin-top: 18px; }
+.lrow3 { display: grid; grid-template-columns: 56px 1fr; align-items: baseline; padding: 15px 0; border-bottom: 1px solid var(--ink-faint); } .lrow3 .mono { font-size: 30px; }
+/* Cadenas de cajas */
+.chain { display: flex; align-items: center; gap: 22px; margin-top: 8px; }
+.chain span, .duel span { font: 400 46px/1 var(--serif); border: 1.5px solid var(--ink); padding: 18px 30px; background: var(--paper); }
+.chain b { font: 400 32px/1 var(--mono); } .chain.wide span { flex: 1; text-align: center; padding: 28px 10px; font-size: 40px; white-space: nowrap; } .chain.big span { font-size: 58px; padding: 22px 38px; } .chain.big { margin-top: 18px; }
+.fill { background: var(--ink) !important; color: var(--paper); }
+.duel { display: flex; align-items: center; gap: 44px; } .duel span { flex: 1; padding: 34px 40px; font-size: 50px; } .duel b { font: 400 96px/1 var(--serif); }
+.tags { display: flex; gap: 20px; margin-top: 40px; } .tags span { font: 400 23px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; border: 1.5px solid var(--ink); padding: 15px 26px; background: var(--paper); }
+/* Columnas con filete superior */
+.tri, .five, .stats { display: grid; gap: 56px; }
+.tri { grid-template-columns: repeat(3, 1fr); margin-top: 64px; } .five { grid-template-columns: repeat(5, 1fr); gap: 30px; margin-top: 78px; }
+.stats { margin-top: 52px; } .stats.two { grid-template-columns: 1fr 1fr; } .stats.three { grid-template-columns: repeat(3, 1fr); }
+.tri > div, .five > div, .stats > div { border-top: 1.5px solid var(--ink); padding-top: 22px; }
+.tri .tag, .stats .tag { margin-bottom: 14px; white-space: normal; } .five .rowh { font-size: 46px; margin: 16px 0 12px; }
+.num { font: 400 190px/.92 var(--serif); letter-spacing: -.02em; margin-bottom: 24px; } .num.sm { font-size: 150px; } .num.md { font-size: 160px; }
+/* Ejemplo */
+.problem { font: 400 56px/1.22 var(--serif); margin-top: 20px; }
+.answer { margin-top: 44px; border: 1.5px solid var(--ink); padding: 26px 36px 30px; background: var(--paper); } .answer .tag { margin-bottom: 14px; }
+.answer u { text-decoration: underline wavy; text-decoration-thickness: 3px; text-underline-offset: 10px; }
+.rub { margin-top: 30px; border-top: 1.5px solid var(--ink); }
+/* Gráficos en una tinta */
+.plot line { stroke: var(--ink); stroke-width: 1.5; } .plot .dash { fill: none; stroke: var(--ink); stroke-width: 3; stroke-dasharray: 12 9; } .plot .dash.thin { stroke-width: 1.5; }
+.plot .bold { fill: none; stroke: var(--ink); stroke-width: 6; } .plot .dot { fill: var(--ink); } .plot text { font: 400 22px var(--mono); fill: var(--ink); letter-spacing: .04em; }
+.pgroup { display: flex; gap: 80px; margin-top: 26px; } .pp { display: flex; gap: 28px; align-items: flex-end; }
+.pbar { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.pcells { display: flex; flex-direction: column-reverse; gap: 4px; } .pcells i { display: block; width: 100px; height: 17px; background: var(--grid); } .pcells i.on { background: var(--ink); }
+/* Cierre alineado a la derecha */
+.colophon { position: absolute; right: 0; top: 96px; text-align: right; } .colophon .tag { margin-bottom: 34px; }
+
+/* ===========================================
+   ANIMACIÓN: entrada escalonada y pasos por clic
+   =========================================== */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.slide.visible .reveal { opacity: 1; transform: none; }
+.d1 { transition-delay: .05s; } .d2 { transition-delay: .18s; } .d3 { transition-delay: .32s; } .d4 { transition-delay: .46s; }
+.step { opacity: 0; transform: translateY(18px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+.step.on { opacity: 1; transform: none; }
+
+/* ===========================================
+   CROMO DE LA PRESENTACIÓN (fuera del escenario)
+   =========================================== */
+.progress { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--ink-soft); z-index: 900; transition: width .3s; }
+.notes-panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 42vh; overflow: auto; background: rgba(21,22,28,.96); color: #ecebe6; font: 400 17px/1.55 var(--sans); padding: 18px 24px 26px; white-space: pre-line; z-index: 950; display: none; border-top: 2px solid var(--ink-soft); }
+.notes-panel.show { display: block; }
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle { position: fixed; top: 14px; left: 14px; font: 500 13px/1 var(--mono); padding: 9px 12px; background: var(--ink); color: var(--paper); border: 0; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .3s ease; z-index: 10001; }
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.editing [contenteditable]:hover { outline: 1.5px dashed var(--ink-soft); outline-offset: 4px; }
+.help { position: fixed; right: 14px; top: 14px; font: 400 12px/1.5 var(--mono); color: #8d8fa0; z-index: 900; text-align: right; }
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+  <main class="deck-stage" id="deckStage">
+
+<!-- ===== 01 · cover ===== -->
+<section class="slide s-cover" id="cover"><div class="chrome top"><span>Workshop · IA en matemáticas en postgrado</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>01 / 17</span></div><div class="frame">
+<h1 class="hero reveal d1">Del otro lado<br><i>del modelo</i></h1>
+<p class="callout cover-sub reveal d2">Cómo aprende una IA de sus errores, y cómo es el trabajo de encontrarlos</p>
+<p class="mono cover-idx reveal d3">Refuerzo · Preferencias · Verificadores · Rúbricas</p>
+<svg class="glitch g-right reveal d3" data-glitch viewBox="0 0 360 704" aria-hidden="true"></svg>
+<svg class="qr reveal d4" data-qr="7" style="right:500px;top:690px;width:192px;height:192px" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"></svg></div><aside class="notes">Buenas tardes. Cuando un modelo resuelve bien un problema de probabilidad, es fácil pensar que eso salió solo de leer internet. No es así. Después de leer, a estos modelos se los corrige. Y en matemáticas, quienes los corrigen son personas con una formación como la de ustedes.
+
+Yo he trabajado en eso. Hoy quiero contarles dos cosas: la matemática de cómo un modelo aprende de sus errores, y cómo es el trabajo de encontrárselos.
+
+Una advertencia antes de partir. Este trabajo se hace bajo acuerdos de confidencialidad, así que todos los ejemplos que verán los construí para esta charla.</aside></section>
+
+<!-- ===== 02 · atencion ===== -->
+<section class="slide " id="atencion"><div class="chrome top"><span>01 · Repaso</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>02 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Qué hay dentro: atención</h2><span class="tag">Un minuto</span></header>
+<div class="cols">
+ <div class="col grow">
+  <div class="eq reveal d2" style="font-size:62px">\[\mathrm{Attn}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V\]</div>
+  <p class="callout reveal d3" style="margin-top:84px">Cada palabra mira<br>a todas las demás.</p>
+  <p class="mono reveal d4" style="margin-top:44px">Costo · O(N²) en el largo del texto</p>
+ </div>
+ <div class="attn reveal d3"><div class="attn-rows"><span>la</span><span>IA</span><span>aprende</span><span>de</span><span>sus</span><span>errores</span></div><div class="attn-grid"><i style="opacity:1.00"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i style="opacity:0.38"></i><i style="opacity:1.00"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i style="opacity:0.45"></i><i style="opacity:0.33"></i><i style="opacity:1.00"></i><i class="off"></i><i class="off"></i><i class="off"></i><i style="opacity:1.00"></i><i style="opacity:0.84"></i><i style="opacity:0.79"></i><i style="opacity:0.27"></i><i class="off"></i><i class="off"></i><i style="opacity:1.00"></i><i style="opacity:0.50"></i><i style="opacity:0.37"></i><i style="opacity:0.30"></i><i style="opacity:0.42"></i><i class="off"></i><i style="opacity:1.00"></i><i style="opacity:0.87"></i><i style="opacity:0.84"></i><i style="opacity:0.83"></i><i style="opacity:0.25"></i><i style="opacity:0.33"></i></div></div>
+</div></div><aside class="notes">Un repaso de un minuto. Un modelo de lenguaje predice la siguiente palabra, y su pieza central es la atención. Cada palabra se representa como un vector y se actualiza con un promedio ponderado de las demás. Los pesos salen de un softmax de productos internos, así que cada fila es una combinación convexa.
+
+El costo es cuadrático en el largo del texto, porque cada palabra se compara con todas.</aside></section>
+
+<!-- ===== 03 · variantes ===== -->
+<section class="slide " id="variantes"><div class="chrome top"><span>01 · Repaso</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>03 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>La arquitectura cambia cada año</h2><span class="tag">Tres variantes</span></header>
+<div class="ledger reveal d2">
+ <div class="lrow"><span class="mono">01</span><span class="rowh">Atención lineal</span><span class="body">Reordenar los productos: costo O(N)</span><span class="mono r">2020</span></div>
+ <div class="lrow"><span class="mono">02</span><span class="rowh">Atención dispersa</span><span class="body">Aprender a qué no mirar</span><span class="mono r">2025</span></div>
+ <div class="lrow"><span class="mono">03</span><span class="rowh">Transformers en bucle</span><span class="body">Un bloque, muchas vueltas</span><span class="mono r">2023</span></div>
+</div>
+<p class="statement reveal d4" style="margin-top:86px"><i>¿Y con qué señal se entrena?</i></p></div><aside class="notes">Ese costo cuadrático motiva mucha investigación. Hay atención lineal, que al reordenar los productos convierte al transformer en una red recurrente. Hay atención dispersa, donde el modelo aprende a qué partes no mirar. Y hay transformers en bucle, que cambian profundidad por iteraciones.
+
+No voy a entrar en ninguna. Las menciono por una razón: la arquitectura cambia cada año, y lo que no cambia es la pregunta de con qué señal se entrena. De eso trata el resto de la charla.
+
+Referencias: Katharopoulos et al. 2020; Yuan et al. 2025 (Native Sparse Attention); Giannou et al. 2023.</aside></section>
+
+<!-- ===== 04 · mdp ===== -->
+<section class="slide " id="mdp"><div class="chrome top"><span>02 · ¿Refuerzo?</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>04 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Escribir es un proceso de decisión</h2><span class="tag">MDP</span></header>
+<div class="chain big reveal d2"><span>Sea</span><b>→</b><span>U</span><b>→</b><span>uniforme</span><b>→</b><span>en</span><b>→</b><span>…</span><b>→</b><span class="fill">r</span></div>
+<div class="tri reveal d3">
+ <div><p class="tag">Estado</p><p class="rowh">Lo escrito hasta ahora</p></div>
+ <div><p class="tag">Acción</p><p class="rowh">La siguiente palabra</p></div>
+ <div><p class="tag">Recompensa</p><p class="rowh">Una sola, al final</p></div>
+</div>
+<div class="inline reveal d4"><p class="callout">La política ya existe:</p><div class="eq" style="font-size:54px">\(\pi_\theta(y_t \mid x,\,y_{&lt;t})\)</div></div></div><aside class="notes">Aquí aparece la pregunta natural: ¿aprendizaje por refuerzo, si esto es una red que predice palabras? Sí, porque escribir una respuesta es un proceso de decisión de Markov.
+
+El estado es la pregunta más lo escrito hasta ahora. La acción es la siguiente palabra. La transición es trivial: se agrega la palabra. Y la recompensa llega una sola vez, al final, cuando alguien juzga la respuesta completa.
+
+Fíjense en la última línea. El modelo ya es una política: una distribución sobre acciones dado el estado. No hay que construirla, solo mejorarla.</aside></section>
+
+<!-- ===== 05 · gradiente ===== -->
+<section class="slide " id="gradiente"><div class="chrome top"><span>02 · ¿Refuerzo?</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>05 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Sin tabla de valores</h2><span class="tag">Del curso de RL a esto</span></header>
+<div class="dimwrap reveal d2"><div class="dim">
+ <p class="tag">Value iteration · Q-learning: un valor por estado</p>
+ <div class="eq" style="font-size:38px;margin-top:22px">\[V_{k+1}(s)=\max_a \sum_{s'} P(s'\mid s,a)\,\big[\,r+\gamma V_k(s')\,\big]\]</div>
+ <p class="mono" style="margin-top:20px">100.000 palabras por paso × 1.000 pasos</p>
+</div></div>
+<p class="tag reveal d3" style="margin-top:64px">Gradiente de política</p>
+<div class="eq reveal d3" style="font-size:60px;margin-top:30px">\[\nabla_\theta J=\mathbb{E}_{y\sim\pi_\theta}\big[\,(r(x,y)-b)\;\nabla_\theta\log\pi_\theta(y\mid x)\,\big]\]</div>
+<p class="callout reveal d4" style="margin-top:48px">Sube la probabilidad de lo que salió mejor que el promedio.</p></div><aside class="notes">En un curso básico se enseñan value iteration y Q-learning. Los dos guardan un valor por cada estado, o por cada par de estado y acción. Aquí eso es imposible: con un vocabulario de cien mil palabras y respuestas de mil palabras, los estados no caben en ninguna tabla.
+
+La salida es la otra familia del curso: el gradiente de política. No se estima cuánto vale cada estado. Se generan respuestas, se mira su recompensa y se mueve la política en la dirección que hace más probables las buenas.
+
+La fórmula dice eso. El gradiente del logaritmo indica cómo hacer más probable una respuesta, y se pondera por cuánto superó al promedio b. En la práctica se usan versiones estabilizadas, como PPO.
+
+Queda una pregunta: ¿de dónde sale la recompensa r? Hay dos respuestas, y son el centro de la charla.</aside></section>
+
+<!-- ===== 06 · preferencias ===== -->
+<section class="slide " id="preferencias"><div class="chrome top"><span>03 · ¿De dónde sale r?</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>06 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Opción 1: preguntarle a una persona</h2><span class="tag">RLHF</span></header>
+<div class="duel reveal d2"><span class="fill">Respuesta A</span><b>≻</b><span>Respuesta B</span></div>
+<div class="eq reveal d3" style="font-size:62px;margin-top:76px">\[P(A\succ B)=\sigma\big(\,r_\phi(x,y_A)-r_\phi(x,y_B)\,\big)\]</div>
+<p class="callout reveal d4" style="margin-top:60px">Una regresión logística sobre diferencias.</p>
+<p class="mono src">Bradley y Terry, 1952 · Christiano et al., 2017 · Ouyang et al., 2022</p></div><aside class="notes">La primera respuesta es preguntarle a una persona. Eso es RLHF: refuerzo con retroalimentación humana.
+
+Pedirle a alguien un puntaje del uno al diez funciona mal, porque cada persona usa la escala a su manera. Funciona mejor mostrar dos respuestas y preguntar cuál es mejor.
+
+Para pasar de comparaciones a números se usa un modelo de 1952, Bradley-Terry, pensado para torneos. Cada respuesta tiene un puntaje latente, y la probabilidad de que A le gane a B es una sigmoide de la diferencia. Es una regresión logística.
+
+Con miles de comparaciones se ajusta una red que asigna puntaje a cualquier respuesta. Esa red es el modelo de recompensa.</aside></section>
+
+<!-- ===== 07 · goodhart ===== -->
+<section class="slide " id="goodhart"><div class="chrome top"><span>03 · ¿De dónde sale r?</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>07 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Optimizar sin alejarse</h2><span class="tag">Opción 1 · segundo paso</span></header>
+<div class="eq reveal d2" style="font-size:54px">\[\max_\theta\;\;\mathbb{E}_{y\sim\pi_\theta}\big[\,r_\phi(x,y)\,\big]\;-\;\beta\,\mathrm{KL}\big(\pi_\theta\,\|\,\pi_{\mathrm{ref}}\big)\]</div>
+<div class="cols" style="margin-top:34px;align-items:center">
+ <div class="reveal d3"><svg class="plot" viewBox="0 0 820 440" width="820" height="440" role="img" aria-label="Esquema: la recompensa aprendida sigue subiendo mientras la calidad real sube y luego cae">
+<line x1="70" y1="370" x2="790" y2="370"/><line x1="70" y1="370" x2="70" y2="40"/>
+<path d="M70 370 L82 354 L94 339 L106 324 L117 311 L129 298 L141 286 L153 274 L165 263 L177 253 L189 243 L201 233 L212 225 L224 216 L236 208 L248 201 L260 194 L272 187 L284 181 L295 175 L307 169 L319 163 L331 158 L343 153 L355 149 L367 144 L378 140 L390 136 L402 133 L414 129 L426 126 L438 123 L450 120 L462 117 L473 114 L485 112 L497 109 L509 107 L521 105 L533 103 L545 101 L556 99 L568 97 L580 96 L592 94 L604 93 L616 91 L628 90 L639 89 L651 88 L663 86 L675 85 L687 84 L699 83 L711 82 L723 82 L734 81 L746 80 L758 79 L770 79" class="dash"/><path d="M70 370 L82 342 L94 317 L106 294 L117 273 L129 254 L141 237 L153 221 L165 207 L177 195 L189 184 L201 174 L212 165 L224 158 L236 151 L248 146 L260 141 L272 137 L284 134 L295 132 L307 130 L319 129 L331 128 L343 128 L355 129 L367 129 L378 131 L390 132 L402 134 L414 136 L426 138 L438 141 L450 144 L462 147 L473 150 L485 153 L497 157 L509 160 L521 164 L533 167 L545 171 L556 175 L568 179 L580 183 L592 187 L604 191 L616 194 L628 198 L639 202 L651 206 L663 210 L675 214 L687 218 L699 221 L711 225 L723 229 L734 232 L746 236 L758 240 L770 243" class="bold"/>
+<rect x="332" y="117" width="22" height="22" class="dot"/>
+<text x="786" y="62" text-anchor="end">recompensa aprendida</text><text x="786" y="290" text-anchor="end">calidad real</text>
+<text x="430" y="420" text-anchor="middle">distancia al modelo original</text></svg></div>
+ <div class="col grow reveal d4"><p class="chapter">Ley de<br>Goodhart</p><p class="body" style="margin-top:30px">La medida se vuelve objetivo<br>y deja de medir.</p></div>
+</div>
+<p class="mono src">Esquema basado en Gao, Schulman y Hilton, 2023</p></div><aside class="notes">Ahora se entrena la política para maximizar esa recompensa, con el gradiente de la diapositiva anterior. Pero aparece un segundo término: una penalización por alejarse del modelo original, medida con la divergencia de Kullback-Leibler.
+
+¿Por qué hace falta? Porque el modelo de recompensa es una aproximación del juicio humano, con errores. Si se lo optimiza sin freno, la política encuentra esos errores y los explota. Es la ley de Goodhart: cuando una medida se convierte en objetivo, deja de ser buena medida.
+
+Esto está medido. La calidad real sube al comienzo y después cae, aunque la recompensa aprendida siga subiendo. El parámetro beta decide dónde detenerse.
+
+El gráfico es un esquema, no datos del artículo.</aside></section>
+
+<!-- ===== 08 · optimo ===== -->
+<section class="slide sparse" id="optimo"><div class="chrome top"><span>03 · La fórmula de la charla</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>08 / 17</span></div><div class="frame">
+<p class="tag reveal d1" style="margin-top:36px">La solución tiene forma cerrada</p>
+<div class="eq reveal d2" style="font-size:84px;margin-top:52px;text-align:left">\(\pi^{*}(y\mid x)\;\propto\;\pi_{\mathrm{ref}}(y\mid x)\;e^{\,r(x,y)/\beta}\)</div>
+<p class="manifesto reveal d3" style="margin-top:100px">El preentrenamiento da el repertorio.</p>
+<p class="manifesto roman step">El refuerzo enseña a elegir.</p>
+<svg class="glitch g-right slim reveal d4" data-glitch viewBox="0 0 360 704" aria-hidden="true"></svg></div><aside class="notes">Ese problema tiene solución explícita, y es la fórmula más importante de la charla. La política óptima es la original multiplicada por un factor exponencial en la recompensa.
+
+Léanla como una reponderación. El refuerzo no agrega conocimiento: toma lo que el modelo ya podía decir y cambia las probabilidades. Si una respuesta tenía probabilidad cero, sigue en cero.
+
+(Clic para la segunda frase.) Por eso digo que el preentrenamiento da el repertorio y el refuerzo enseña a elegir. Un modelo que leyó internet puede producir la demostración correcta y también la errada. El refuerzo inclina la balanza.
+
+De aquí sale además un método llamado DPO, que despeja la recompensa de esta ecuación y entrena sin un modelo de recompensa aparte.
+
+Y de aquí sale la consecuencia práctica. Los datos que más valen son los de casos donde la respuesta más probable del modelo es errada. Encontrar esos casos es el trabajo que les voy a describir.
+
+Matiz si preguntan: hay un debate abierto (Yue et al., 2025) sobre si el refuerzo amplía la capacidad o solo la eficiencia.</aside></section>
+
+<!-- ===== 09 · verificador ===== -->
+<section class="slide " id="verificador"><div class="chrome top"><span>04 · ¿De dónde sale r?</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>09 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Opción 2: preguntarle a un verificador</h2><span class="tag">RLVR</span></header>
+<div class="eq reveal d2" style="font-size:56px">\[r(x,y)=\mathbf{1}\big[\,\text{el verificador acepta } y\,\big]\]</div>
+<div class="tags reveal d3"><span>Respuesta exacta</span><span>Tests</span><span class="fill">Lean</span></div>
+<div class="stats two reveal d4">
+ <div><p class="num md">Plata</p><p class="tag">IMO 2024</p><p class="body">Demostraciones formales, verificadas en Lean</p></div>
+ <div><p class="num md">35/42</p><p class="tag">IMO 2025</p><p class="body">Lenguaje natural, puntaje certificado</p></div>
+</div>
+<p class="mono src">AlphaProof, Nature 2025 · Google DeepMind, julio de 2025</p></div><aside class="notes">La segunda respuesta es no preguntarle a nadie. Si el problema tiene una respuesta que una máquina puede comprobar, la recompensa es uno si el verificador acepta y cero si no.
+
+En matemáticas hay tres verificadores naturales: comparar con la respuesta exacta, correr tests y, el más interesante, un asistente de demostración. Después del café verán Lean. Desde este punto de vista, Lean es una función de recompensa perfecta: no se equivoca y no se cansa.
+
+Así se entrenó AlphaProof, que llegó a nivel de medalla de plata en la olimpiada internacional de 2024. Un año después, otro sistema obtuvo 35 de 42 puntos escribiendo en lenguaje natural, puntaje certificado por los coordinadores.
+
+Precisión: no se entregaron medallas a sistemas de IA; se certificó un puntaje equivalente a oro.</aside></section>
+
+<!-- ===== 10 · rubrica ===== -->
+<section class="slide " id="rubrica"><div class="chrome top"><span>04 · Donde no hay verificador</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>10 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Vuelve una persona</h2><span class="tag">Rúbricas</span></header>
+<p class="statement reveal d2">Una rúbrica es un verificador<br><i>escrito por una persona.</i></p>
+<div class="stats three reveal d3">
+ <div><p class="num sm">262</p><p class="tag">Médicos</p><p class="body">escribieron las rúbricas de un benchmark</p></div>
+ <div><p class="num sm">48.562</p><p class="tag">Criterios</p><p class="body">cada uno se responde sí o no</p></div>
+ <div><p class="num sm">0,83</p><p class="tag">F1 del corrector automático</p><p class="body">frente a expertos humanos</p></div>
+</div>
+<p class="mono src">HealthBench, 2025 · PaperBench, 2025</p></div><aside class="notes">Esto tiene tres límites. Primero, solo sirve donde existe un verificador, y la mayor parte de la matemática que hacemos no está formalizada. Segundo, los modelos aprenden a hacer trampa: hay casos documentados donde, en vez de resolver el problema, modifican los tests. Tercero, hay un debate abierto sobre si este entrenamiento amplía lo que el modelo puede resolver o solo lo vuelve más eficiente.
+
+Entonces, ¿qué se hace cuando no hay verificador? Se escribe uno. Una rúbrica es una pauta de corrección con criterios que se responden sí o no. La escribe un experto una vez, y después otro modelo la aplica a miles de respuestas.
+
+Un benchmark médico reciente usó 262 médicos y más de 48 mil criterios. Y los correctores automáticos que aplican rúbricas coinciden bastante con los expertos, aunque no del todo.
+
+Ahí entran ustedes.
+
+Precisión: el F1 de 0,83 es sobre criterios binarios de un benchmark; no significa que el corrector equivalga a un experto en general. Trampas en tests: Baker et al., 2025.</aside></section>
+
+<!-- ===== 11 · anatomia ===== -->
+<section class="slide " id="anatomia"><div class="chrome top"><span>05 · Cómo se producen los datos</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>11 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Anatomía de una tarea</h2><span class="tag">La cadena</span></header>
+<div class="chain wide reveal d2"><span>Laboratorio</span><b>→</b><span>Intermediaria</span><b>→</b><span class="fill">Especialista</span><b>→</b><span>Control de calidad</span></div>
+<div class="five reveal d3">
+ <div><p class="mono">01</p><p class="rowh">Problema</p><p class="body">donde el modelo falla</p></div>
+ <div><p class="mono">02</p><p class="rowh">Comparar</p><p class="body">A contra B: la recompensa</p></div>
+ <div><p class="mono">03</p><p class="rowh">Diagnosticar</p><p class="body">qué tipo de error fue</p></div>
+ <div><p class="mono">04</p><p class="rowh">Rúbrica</p><p class="body">el verificador a mano</p></div>
+ <div><p class="mono">05</p><p class="rowh">Corregir</p><p class="body">la respuesta ideal</p></div>
+</div></div><aside class="notes">Así funciona la cadena. Un laboratorio necesita datos y contrata a una empresa intermediaria. Esa empresa recluta especialistas, les asigna tareas y revisa su trabajo antes de entregarlo.
+
+Una tarea típica tiene cinco pasos. Escribes un problema de tu área. Dos modelos lo responden y eliges la mejor respuesta. Clasificas el error: planteamiento equivocado, dato inventado, paso sin justificar, condición ignorada o error de cálculo. Escribes la rúbrica. Y a veces corriges la respuesta hasta dejarla ideal.
+
+Cada paso conecta con lo anterior. La preferencia alimenta a Bradley-Terry. La rúbrica es el verificador escrito a mano. Y la corrección sirve para entrenar por imitación.</aside></section>
+
+<!-- ===== 12 · ejemplo ===== -->
+<section class="slide " id="ejemplo"><div class="chrome top"><span>05 · Un ejemplo en miniatura</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>12 / 17</span></div><div class="frame">
+<p class="tag reveal d1" style="margin-top:8px">El problema</p>
+<p class="problem reveal d2">Sea \(U\) uniforme en \([0,1]\) y \(A_n=\{U&lt;1/n\}\). Como \(\sum_n P(A_n)=\infty\), ¿ocurre \(A_n\) infinitas veces casi seguramente?</p>
+<div class="answer step"><p class="tag">Respuesta del modelo</p><p class="callout">Sí. Por el <u>segundo lema de Borel-Cantelli</u>, la divergencia de la serie implica probabilidad 1.</p></div>
+<div class="rub step">
+ <div class="lrow3"><span class="mono">✗</span><span class="body">Notar que el lema exige independencia, y aquí no la hay</span></div>
+ <div class="lrow3"><span class="mono">✗</span><span class="body">Concluir que la probabilidad es 0</span></div>
+ <div class="lrow3"><span class="mono">✗</span><span class="body">Justificarlo: los \(A_n\) decrecen, y su intersección es \(\{U=0\}\)</span></div>
+</div>
+<p class="mono src">Ejemplo ilustrativo creado con Claude para esta charla. No proviene de ningún proyecto real.</p></div><aside class="notes">Un ejemplo, que armé para hoy. Lean el problema. (Pausa de cinco segundos.)
+
+(Clic: aparece la respuesta.) El modelo responde que sí, por el segundo lema de Borel-Cantelli. Suena bien y está mal. Ese lema exige independencia, y estos eventos están encajados: si U es menor que un décimo, también es menor que un noveno. La respuesta correcta es probabilidad cero.
+
+El error tiene nombre en este trabajo: condición ignorada. El modelo aplicó un teorema sin revisar su hipótesis, que es el mismo error que comete un estudiante apurado.
+
+(Clic: aparece la rúbrica.) Tres criterios, cada uno verificable con un sí o un no, y cualquiera puede aplicarla sin saber probabilidades.
+
+Una aclaración honesta: un modelo actual no cae en este problema. Los problemas reales tienen que ser mucho más difíciles, precisamente porque los fáciles ya no hacen fallar a nadie.</aside></section>
+
+<!-- ===== 13 · frontera ===== -->
+<section class="slide " id="frontera"><div class="chrome top"><span>05 · Qué se pide de verdad</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>13 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Saber más que el modelo</h2><span class="tag">Tres exigencias</span></header>
+<div class="tri big reveal d2">
+ <div><p class="mono">01</p><p class="chapter sm">Frontera</p><p class="body">Resultados de hace meses,<br>no de libro de texto</p></div>
+ <div><p class="mono">02</p><p class="chapter sm">Razonamiento</p><p class="body">Un fallo que un buscador<br>no arregla</p></div>
+ <div><p class="mono">03</p><p class="chapter sm">Rúbrica</p><p class="body">Atómica, autocontenida,<br>sin solaparse</p></div>
+</div>
+<p class="statement reveal d4" style="margin-top:80px">La habilidad: <i>diseñar el examen.</i></p></div><aside class="notes">¿Qué se pide entonces? Tres cosas.
+
+Primero, problemas en la frontera. Es común trabajar con artículos publicados hace pocos meses, y hay que entenderlos mejor que el modelo.
+
+Segundo, el fallo tiene que ser de razonamiento. Que el modelo invente una cita no interesa mucho, porque eso se arregla dándole un buscador. Interesa cuando razona mal con la información correcta delante.
+
+Tercero, la rúbrica. Cada criterio prueba una sola cosa, se entiende sin leer el problema y no repite a otro. Es la pauta de corrección que todos quisimos que tuvieran nuestros ayudantes.
+
+Para entrar hay una evaluación: una prueba del área y una tarea de muestra. Es bastante libre, con una condición: que el modelo se equivoque y que puedas demostrar por qué.
+
+La habilidad es diseñar el examen: hay que saber dónde está el límite de lo que el modelo entiende.</aside></section>
+
+<!-- ===== 14 · datos ===== -->
+<section class="slide " id="datos"><div class="chrome top"><span>06 · Qué se hace con los datos</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>14 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Y alguien analiza todo esto</h2><span class="tag">1.000 comparaciones sintéticas</span></header>
+<div class="cols" style="gap:70px;align-items:flex-end;margin-top:6px">
+ <div class="reveal d2"><svg class="plot" viewBox="0 0 800 400" width="800" height="400" role="img" aria-label="Efecto de la dificultad: crudo 0,24; ajustado por categoría, cerca de cero; efecto real 0,10">
+<text x="120" y="42">Efecto de la dificultad (IC 95 %)</text>
+<line x1="320" y1="76" x2="320" y2="318"/><line x1="400" y1="76" x2="400" y2="318" class="dash thin"/>
+<line x1="396" y1="150" x2="624" y2="150" class="bold"/><rect x="498" y="138" width="24" height="24" class="dot"/><text x="650" y="159">crudo</text><line x1="193" y1="256" x2="434" y2="256" class="bold"/><rect x="302" y="244" width="24" height="24" class="dot"/><text x="460" y="265">ajustado</text>
+<text x="320" y="358" text-anchor="middle">0</text><text x="412" y="358">efecto real: 0,10</text></svg></div>
+ <div class="col grow reveal d3">
+  <p class="tag">¿Qué capturan los clusters? (AMI)</p>
+  <div class="pgroup"><div class="pg"><div class="pp"><div class="pbar"><span class="mono">0,38</span><div class="pcells"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><span class="mono">tema</span></div><div class="pbar"><span class="mono">0,19</span><div class="pcells"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><span class="mono">motivo</span></div></div><p class="tag c">Sin instrucción</p></div><div class="pg"><div class="pp"><div class="pbar"><span class="mono">0,03</span><div class="pcells"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><span class="mono">tema</span></div><div class="pbar"><span class="mono">0,66</span><div class="pcells"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i></div><span class="mono">motivo</span></div></div><p class="tag c">Con instrucción</p></div></div>
+ </div>
+</div>
+<p class="mono src">772 reseñas · Qwen3-Embedding-8B, UMAP y HDBSCAN · Notebook: [enlace o QR]</p></div><aside class="notes">Hay un segundo trabajo, del que se habla menos: analizar estos datos antes de entregarlos. Este es un notebook con datos sintéticos: mil comparaciones entre dos modelos, con las reseñas que escribe cada evaluador.
+
+A la izquierda hay una lección de estadística. Parece que un modelo gana por más margen en los problemas difíciles: el efecto crudo es 0,24 y es significativo. Pero los problemas difíciles se concentran en ciertas categorías, y al controlar por categoría el efecto cae a cero, compatible con el valor real de 0,10 con que se generaron los datos. Es confusión, la del curso de inferencia, y pasa en datos de verdad.
+
+A la derecha, las reseñas que escriben los evaluadores, convertidas en vectores y agrupadas. La pregunta es qué capturan los grupos: el tema del problema o el motivo de la crítica. Sin ayuda, siguen el tema (0,38 contra 0,19) y además cambian al repetir el análisis. Con una instrucción de una frase que le pide al modelo fijarse en el tipo de error, pasan a seguir el motivo (0,66 contra 0,03), se vuelven estables y recuperan los seis motivos con pureza de 79 a 95 %. La lección: el método sofisticado no responde solo la pregunta correcta; hay que decírsela, y hay que comprobarlo contra algo conocido.
+
+Un dato para quienes hacen topología: HDBSCAN es, en esencia, homología persistente en dimensión cero. Sigue las componentes conexas mientras se relaja un umbral de densidad y se queda con las que sobreviven más.
+
+Datos de respaldo: 601 reseñas, vectores de 4096 dimensiones. Estabilidad (ARI mínimo entre semillas): 0,18 sin instrucción y 0,75 con instrucción. Reseñas sin cluster: 24 % y 3 %. Control sin estructura: el mismo procedimiento encuentra 5 y 2 clusters, así que algunos grupos aparecen por puro azar.
+
+Nadie les va a exigir una herramienta. Les van a pedir una conclusión defendible, y la matemática que ya saben es la ventaja.
+
+PENDIENTE: poner el enlace o QR al notebook.</aside></section>
+
+<!-- ===== 15 · cifras ===== -->
+<section class="slide " id="cifras"><div class="chrome top"><span>07 · La industria</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>15 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Cuánto vale un dato experto</h2><span class="tag">Millones de dólares</span></header>
+<div class="stats three reveal d2" style="margin-top:70px">
+ <div><p class="num md">14.300</p><p class="tag">Meta, por el 49 % de Scale AI</p><p class="body">2025</p></div>
+ <div><p class="num md">20.000</p><p class="tag">Valoración anunciada de Mercor</p><p class="body">Noviembre de 2026</p></div>
+ <div><p class="num md">&gt;1.000</p><p class="tag">Ingresos reportados de Surge AI</p><p class="body">2024</p></div>
+</div>
+<p class="mono src">Anuncios de las empresas y prensa. Son empresas privadas: los ingresos no están auditados.</p></div><aside class="notes">¿Es esto un nicho? Miren los números. Meta pagó más de 14 mil millones de dólares por la mitad de una empresa de datos. Otra, fundada hace pocos años, anunció este mes una valoración de 20 mil millones.
+
+Una cautela: son empresas privadas. Las valoraciones son anuncios propios y los ingresos vienen de la prensa. Tómenlos como órdenes de magnitud.
+
+El giro importante ocurrió en 2025. La demanda pasó del etiquetado general, que cualquiera puede hacer, a datos producidos por gente con posgrado.</aside></section>
+
+<!-- ===== 16 · balance ===== -->
+<section class="slide " id="balance"><div class="chrome top"><span>07 · Qué esperar</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>16 / 17</span></div><div class="frame"><header class="head reveal d1"><h2>Lo bueno y lo incómodo</h2><span class="tag">Balance</span></header>
+<div class="cols" style="gap:96px;margin-top:10px">
+ <div class="col grow reveal d2"><p class="tag">A favor</p>
+  <div class="lrow2"><span class="rowh">Te pagan por pensar en tu área</span></div>
+  <div class="lrow2"><span class="rowh">Remoto, con horario libre</span></div>
+  <div class="lrow2"><span class="rowh">30 a 50 dólares la hora en avisos para matemáticos</span></div></div>
+ <div class="col grow reveal d3"><p class="tag">En contra</p>
+  <div class="lrow2"><span class="rowh"><i>Proyectos que aparecen y desaparecen</i></span></div>
+  <div class="lrow2"><span class="rowh"><i>Tarifas con recortes documentados</i></span></div>
+  <div class="lrow2"><span class="rowh"><i>Control de calidad opaco</i></span></div></div>
+</div>
+<p class="mono src">Contraste: filtrar contenido tóxico se pagó a menos de 2 dólares la hora en Kenia (TIME, 2023)</p></div><aside class="notes">¿Les conviene? Les doy las dos caras.
+
+A favor: es de los pocos trabajos remotos donde te pagan por pensar en tu propia área. Aprendes mucho sobre cómo fallan estos modelos, y eso sirve para investigar con ellos. Los avisos para matemáticos con posgrado rondan los 30 a 50 dólares la hora, y algunas empresas declaran promedios más altos.
+
+En contra: es trabajo por encargo. Un proyecto puede terminar de un día para otro. Las tarifas de los avisos son techos, y hay recortes documentados. El control de calidad es opaco. Y varias de estas empresas enfrentan demandas de sus propios trabajadores, que por ahora son alegaciones.
+
+Un contraste para dimensionar. La anotación generalista incluye filtrar lo peor de internet, y se ha pagado a menos de dos dólares la hora. El trabajo especializado en ciencias es otra cosa: el desgaste es cognitivo. Pero la estructura laboral se parece más de lo que uno quisiera.
+
+(Tu opinión aquí: por ejemplo, que sirve como ingreso complementario y como escuela.)</aside></section>
+
+<!-- ===== 17 · cierre ===== -->
+<section class="slide sparse" id="cierre"><div class="chrome top"><span>Para el conversatorio</span><span>Del otro lado del modelo</span></div><div class="hair t"></div><div class="hair b"></div><div class="chrome bot"><span>Vicente Fernández</span><span>17 / 17</span></div><div class="frame">
+<svg class="glitch g-left reveal d2" data-glitch="flip" viewBox="0 0 360 704" aria-hidden="true"></svg>
+<div class="colophon">
+ <p class="tag reveal d1">Una pregunta</p>
+ <p class="closing reveal d2">¿Qué parte de la matemática<br>seguirá necesitando<br><i>a esa persona?</i></p>
+ <p class="callout reveal d4" style="margin-top:70px">Gracias.</p>
+</div></div><aside class="notes">Cierro con tres ideas. Estos modelos aprenden a elegir entre lo que ya saben decir. Para elegir necesitan una señal. Y esa señal viene de un verificador o de una persona que, en ese problema, sabe más que el modelo.
+
+Les dejo una pregunta para el conversatorio. Cada año el modelo resuelve más, y la frontera donde alguien puede corregirlo se mueve. ¿Qué parte de la matemática va a seguir necesitando a esa persona?
+
+Gracias.</aside></section>
+
+  </main>
+</div>
+<div class="progress" id="progress"></div>
+<div class="notes-panel" id="notesPanel" aria-live="polite"></div>
+<div class="help" id="help">← → avanzar · F pantalla completa · N notas · E editar</div>
+<div class="edit-hotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Modo edición (E)">Editar</button>
+
+<script>
+/* Configuración de MathJax: fórmulas como SVG, sin fuentes externas */
+window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] }, svg: { fontCache: 'local' }, options: { enableMenu: false } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
+<script>
+/* ===========================================
+   DECORACIONES: columna escalonada y parche 8×8
+   =========================================== */
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  document.querySelectorAll('[data-glitch]').forEach((g) => {
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const flip = g.dataset.glitch === 'flip';
+    for (let c = 0; c < 9; c++) {
+      const top = c * 62, h = 704 - top - Math.floor(rnd() * 120);
+      for (let k = 0; k < 4; k++) {
+        const r = document.createElementNS(NS, 'rect');
+        const x = 360 - (c + 1) * 40 + k * 9;
+        r.setAttribute('x', flip ? 360 - x - 5 : x); r.setAttribute('y', top);
+        r.setAttribute('width', k % 2 ? 2 : 5); r.setAttribute('height', h);
+        r.setAttribute('fill', '#1F2BE0'); r.setAttribute('opacity', (0.95 - c * 0.07).toFixed(2));
+        g.appendChild(r);
+      }
+    }
+  });
+  document.querySelectorAll('[data-qr]').forEach((q) => {
+    let seed = +q.dataset.qr || 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < 37; i++) rnd();
+    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) if (rnd() > 0.48) {
+      const r = document.createElementNS(NS, 'rect');
+      r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', 1); r.setAttribute('height', 1); r.setAttribute('fill', '#1F2BE0');
+      q.appendChild(r);
+    }
+  });
+})();
+
+/* ===========================================
+   CONTROLADOR: escala, navegación, pasos y notas
+   =========================================== */
+class SlidePresentation {
+  constructor() {
+    this.slides = [...document.querySelectorAll('.slide')];
+    this.stage = document.getElementById('deckStage');
+    this.progress = document.getElementById('progress');
+    this.notesPanel = document.getElementById('notesPanel');
+    this.current = 0;
+    const scale = () => {
+      const f = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      const x = (window.innerWidth - 1920 * f) / 2, y = (window.innerHeight - 1080 * f) / 2;
+      this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+    };
+    scale(); window.addEventListener('resize', scale);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.isContentEditable) return;
+      if (['ArrowRight', 'ArrowDown', ' ', 'PageDown', 'Enter'].includes(e.key)) { e.preventDefault(); this.next(); }
+      else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
+      else if (e.key === 'Home') this.show(0, true);
+      else if (e.key === 'End') this.show(this.slides.length - 1, true);
+      else if (e.key === 'n' || e.key === 'N') this.notesPanel.classList.toggle('show');
+      else if (e.key === 'f' || e.key === 'F') { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); }
+    });
+    let x0 = null;
+    document.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null;
+      if (Math.abs(dx) > 40) (dx < 0 ? this.next() : this.prev());
+    });
+    let wheelLock = false;
+    document.addEventListener('wheel', (e) => {
+      if (wheelLock || this.notesPanel.contains(e.target) || Math.abs(e.deltaY) < 30) return;
+      wheelLock = true; setTimeout(() => (wheelLock = false), 600);
+      e.deltaY > 0 ? this.next() : this.prev();
+    }, { passive: true });
+    this.stage.addEventListener('click', (e) => { if (!document.body.classList.contains('editing')) this.next(); });
+
+    // Permite abrir una diapositiva concreta con #slide-N
+    const m = /^#slide-(\d+)$/.exec(location.hash);
+    this.show(m ? +m[1] - 1 : 0, true);
+    setTimeout(() => document.getElementById('help').style.opacity = '0', 6000);
+    document.getElementById('help').style.transition = 'opacity 1s';
+  }
+  next() {
+    const pending = this.slides[this.current].querySelector('.step:not(.on)');
+    if (pending) pending.classList.add('on'); else this.show(this.current + 1, false);
+  }
+  prev() { this.show(this.current - 1, true); }
+  show(i, allSteps) {
+    const n = Math.max(0, Math.min(i, this.slides.length - 1));
+    if (n === this.current && this.slides[n].classList.contains('active')) return;
+    this.current = n;
+    this.slides.forEach((s, k) => { s.classList.toggle('active', k === n); s.classList.toggle('visible', k === n); });
+    this.slides[n].querySelectorAll('.step').forEach((el) => el.classList.toggle('on', !!allSteps));
+    this.progress.style.width = ((n + 1) / this.slides.length * 100) + '%';
+    const notes = this.slides[n].querySelector('.notes');
+    this.notesPanel.textContent = notes ? notes.textContent.trim() : '';
+  }
+}
+const deck = new SlidePresentation();
+
+/* ===========================================
+   EDICIÓN EN LÍNEA: tecla E o esquina superior izquierda
+   Los cambios se guardan en este navegador
+   =========================================== */
+const editor = {
+  isActive: false, KEY: 'otro-lado-v1:',
+  targets() { return document.querySelectorAll('.frame h1, .frame h2, .frame p, .frame .chain span, .frame .duel span, .frame .tags span, .frame .lrow span, .frame .lrow2 span, .frame .lrow3 span'); },
+  toggleEditMode() {
+    this.isActive = !this.isActive;
+    document.body.classList.toggle('editing', this.isActive);
+    editToggle.classList.toggle('active', this.isActive);
+    editToggle.textContent = this.isActive ? 'Listo' : 'Editar';
+    this.targets().forEach((el) => { if (!el.querySelector('mjx-container')) el.contentEditable = this.isActive ? 'true' : 'false'; });
+  },
+  save(el) {
+    const slide = el.closest('.slide'); if (!slide) return;
+    try { localStorage.setItem(this.KEY + slide.id, slide.querySelector('.frame').innerHTML); } catch (e) {}
+  },
+  restore() {
+    document.querySelectorAll('.slide').forEach((slide) => {
+      let saved = null; try { saved = localStorage.getItem(this.KEY + slide.id); } catch (e) {}
+      if (saved) slide.querySelector('.frame').innerHTML = saved;
+    });
+  }
+};
+editor.restore();
+const editToggle = document.getElementById('editToggle');
+const hotzone = document.querySelector('.edit-hotzone');
+let hideTimeout = null;
+editToggle.addEventListener('click', () => editor.toggleEditMode());
+hotzone.addEventListener('mouseenter', () => { clearTimeout(hideTimeout); editToggle.classList.add('show'); });
+hotzone.addEventListener('mouseleave', () => { hideTimeout = setTimeout(() => { if (!editor.isActive) editToggle.classList.remove('show'); }, 400); });
+editToggle.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+editToggle.addEventListener('mouseleave', () => { hideTimeout = setTimeout(() => { if (!editor.isActive) editToggle.classList.remove('show'); }, 400); });
+hotzone.addEventListener('click', () => editor.toggleEditMode());
+document.addEventListener('keydown', (e) => { if ((e.key === 'e' || e.key === 'E') && !e.target.isContentEditable) editor.toggleEditMode(); });
+document.addEventListener('input', (e) => { if (e.target.isContentEditable) editor.save(e.target); });
+</script>
+</body>
+</html>
+
+</body></html>
