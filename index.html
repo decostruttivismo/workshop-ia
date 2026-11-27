@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Workshop «IA en matemáticas en postgrado», Pontificia Universidad Católica de Chile, 20 de noviembre de 2026: programa, resúmenes, slides y recursos.">
+<style>:root{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>IA en matemáticas en postgrado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: one centered column on graph-paper ground; program as a timeline, slides as a grid of cards */
+:root {
+  --bg: #F6F7F9;
+  --grid: #E6E9EF;
+  --surface: #FFFFFF;
+  --ink: #03122E;
+  --ink-soft: #3B4559;
+  --muted: #5F6A80;
+  --line: #DCE1EA;
+  --accent: #0176DE;
+  --accent-ink: #173F8A;
+  --gold: #FEC60D;
+  --code-bg: #03122E;
+  --code-fg: #E8EDF5;
+  --chip-ok-bg: #E3F0FD; --chip-ok-fg: #0B4F99;
+  --chip-wait-bg: #FFF4CC; --chip-wait-fg: #6B5300;
+  --chip-off-bg: #EEF0F4; --chip-off-fg: #4F596B;
+  --font-display: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Roboto Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #071226; --grid: #0E1D38; --surface: #0D1B33; --ink: #EAF0FA; --ink-soft: #C2CCDD; --muted: #93A0B8;
+    --line: #1E2F4D; --accent: #5AAEF5; --accent-ink: #9CC9F7; --gold: #FEC60D; --code-bg: #030B1A; --code-fg: #E8EDF5;
+    --chip-ok-bg: #12345C; --chip-ok-fg: #BFDDFB; --chip-wait-bg: #3A3110; --chip-wait-fg: #F5DB80; --chip-off-bg: #1A2740; --chip-off-fg: #AEB9CC;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #071226; --grid: #0E1D38; --surface: #0D1B33; --ink: #EAF0FA; --ink-soft: #C2CCDD; --muted: #93A0B8;
+  --line: #1E2F4D; --accent: #5AAEF5; --accent-ink: #9CC9F7; --gold: #FEC60D; --code-bg: #030B1A; --code-fg: #E8EDF5;
+  --chip-ok-bg: #12345C; --chip-ok-fg: #BFDDFB; --chip-wait-bg: #3A3110; --chip-wait-fg: #F5DB80; --chip-off-bg: #1A2740; --chip-off-fg: #AEB9CC;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.wrap {
+  max-width: 980px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; color: var(--ink); }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-ink); }
+.mono { font-family: var(--font-mono); }
+
+/* nav */
+nav.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 21; background: var(--bg); }
+nav.top .wrap { display: flex; gap: 6px 20px; align-items: center; flex-wrap: wrap; padding-block: 10px; }
+nav.top .brand { font-family: var(--font-mono); font-weight: 700; font-size: 13px; letter-spacing: .08em; color: var(--ink); text-decoration: none; margin-right: auto; }
+nav.top a.link { font-size: 14px; color: var(--ink-soft); text-decoration: none; }
+nav.top a.link:hover { color: var(--accent); }
+
+/* hero */
+.hero .wrap { padding-block: 56px 40px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end; }
+.badge { display: inline-block; background: var(--gold); color: #03122E; font-family: var(--font-mono); font-weight: 700; font-size: 13px; letter-spacing: .12em; padding: 6px 12px; }
+.hero h1 { font-weight: 900; font-size: clamp(40px, 7vw, 76px); line-height: .98; letter-spacing: -0.03em; margin: 18px 0 12px; }
+.hero .lead { font-size: 19px; color: var(--ink-soft); max-width: 58ch; margin: 0 0 16px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 24px; font-weight: 500; color: var(--accent-ink); margin: 0 0 18px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-area { background: var(--accent-ink); color: var(--bg); font-size: 13px; font-weight: 700; padding: 5px 11px; }
+.qr-card { background: var(--surface); border: 2px solid var(--ink); padding: 16px; width: 220px; display: grid; gap: 10px; justify-items: center; text-align: center; }
+.qr-card img { width: 168px; height: 168px; background: #fff; }
+.qr-card strong { font-size: 15px; line-height: 1.3; }
+.btn { display: inline-block; background: var(--accent); color: #fff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 10px 14px; }
+.btn:hover { filter: brightness(1.08); }
+@media (max-width: 720px) { .hero .wrap { grid-template-columns: 1fr; } .qr-card { width: 100%; max-width: 320px; } }
+
+.lean { background: var(--code-bg); color: var(--code-fg); font-family: var(--font-mono); font-size: 14px; line-height: 1.7; padding: 16px 20px; overflow-x: auto; white-space: pre; margin: 0; }
+.lean .k { color: #6FB6F5; } .lean .s { color: var(--gold); } .lean .c { color: #9FAAC0; }
+
+/* sections */
+section.block { padding-block: 44px; border-top: 1px solid var(--line); }
+section.block h2 { font-size: clamp(26px, 4vw, 36px); font-weight: 900; letter-spacing: -0.02em; margin: 6px 0 18px; line-height: 1.1; }
+.prose { max-width: 68ch; color: var(--ink-soft); }
+.prose p { margin: 0 0 12px; }
+
+/* program */
+.bloque { margin-top: 26px; }
+.bloque-h { background: var(--code-bg); color: #fff; font-family: var(--font-mono); font-size: 13px; font-weight: 700; letter-spacing: .1em; padding: 8px 12px; }
+.bloque-h span { color: #6FB6F5; margin-right: 10px; }
+.talk { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 4px 20px; padding: 16px 0; border-bottom: 1px solid var(--line); background: transparent; }
+.talk .time { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--accent); padding-top: 3px; font-variant-numeric: tabular-nums; }
+.talk .who { font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.talk h3 { margin: 2px 0 0; font-size: 19px; line-height: 1.3; font-weight: 700; }
+.talk details { margin-top: 6px; }
+.talk summary { cursor: pointer; font-size: 14px; color: var(--accent); font-weight: 500; }
+.talk details p { margin: 8px 0 0; color: var(--ink-soft); max-width: 70ch; }
+.pausa { display: grid; grid-template-columns: 120px minmax(0,1fr); gap: 20px; padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-style: italic; }
+.pausa .time { font-family: var(--font-mono); font-style: normal; font-size: 13px; color: var(--muted); }
+@media (max-width: 560px) { .talk, .pausa { grid-template-columns: 1fr; gap: 2px; } }
+
+/* slides */
+.slides-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+@media (max-width: 860px) { .slides-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .slides-grid { grid-template-columns: 1fr; } }
+.slide-card { background: var(--surface); border: 1px solid var(--line); padding: 16px; display: grid; grid-template-rows: auto auto 1fr auto; gap: 8px; min-width: 0; }
+.slide-card .who { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.slide-card h3 { margin: 0; font-size: 16px; line-height: 1.3; }
+.slide-card .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.status { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 3px 8px; justify-self: start; text-transform: uppercase; }
+.status.pdf, .status.html { background: var(--chip-ok-bg); color: var(--chip-ok-fg); }
+.status.pending { background: var(--chip-wait-bg); color: var(--chip-wait-fg); }
+.status.none { background: var(--chip-off-bg); color: var(--chip-off-fg); }
+.slide-card .note { font-size: 13px; color: var(--muted); margin: 0; }
+.btn-ghost { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); font: inherit; font-size: 13px; font-weight: 700; padding: 7px 11px; cursor: pointer; text-decoration: none; }
+.btn-ghost:hover { background: var(--chip-ok-bg); }
+
+.viewer { margin-top: 20px; border: 2px solid var(--ink); background: var(--surface); }
+.viewer-bar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.viewer-bar strong { margin-right: auto; font-size: 15px; }
+.viewer-frame { width: 100%; aspect-ratio: 16 / 10; max-width: 100%; border: 0; display: block; background: #fff; }
+
+/* outcomes + resources */
+.cards2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 640px) { .cards2 { grid-template-columns: 1fr; } }
+.panel { background: var(--surface); border: 1px solid var(--line); padding: 18px; min-width: 0; }
+.panel h3 { margin: 0 0 8px; font-size: 17px; }
+.panel p { margin: 0; color: var(--ink-soft); font-size: 15px; }
+.placeholder { border-style: dashed; }
+.panel .status { margin-bottom: 8px; display: inline-block; }
+ul.res { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+ul.res li { display: grid; gap: 2px; }
+ul.res a { font-weight: 500; }
+ul.res span { font-size: 14px; color: var(--muted); }
+
+footer { border-top: 1px solid var(--line); padding-block: 28px 40px; font-size: 14px; color: var(--muted); }
+footer strong { color: var(--accent-ink); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+section[id] { scroll-margin-top: 64px; }
+</style>
+</head>
+<body>
+
+
+<nav class="top" aria-label="Secciones">
+  <div class="wrap">
+    <a class="brand" href="#inicio">IA · MAT · POSTGRADO</a>
+    <a class="link" href="#programa">Programa</a>
+    <a class="link" href="#slides">Slides</a>
+    <a class="link" href="#resultados">Lo que salió</a>
+    <a class="link" href="#recursos">Para seguir</a>
+  </div>
+</nav>
+
+<header class="hero" id="inicio">
+  <div class="wrap">
+    <div>
+      <span class="badge">WORKSHOP · 20 NOV 2026</span>
+      <h1>IA en matemáticas en postgrado</h1>
+      <p class="lead">Una tarde para pensar qué significa la inteligencia artificial para el trabajo matemático y estadístico: qué cambia, qué conviene delegar y qué oportunidades abre para la carrera académica y profesional.</p>
+      <p class="facts"><span>Viernes 20 de noviembre · 14:30 – 19:00</span><span>Auditorio de Ciencias de la Salud</span></p>
+      <div class="chips"><span class="chip-area">Matemáticas</span><span class="chip-area">Estadística</span><span class="chip-area">Ingeniería Matemática y Computacional</span></div>
+    </div>
+    <aside class="qr-card" aria-label="Cuestionario post-workshop">
+      <img src="qr-post.png" alt="Código QR del cuestionario post-workshop">
+      <strong>¡Continuemos la discusión!</strong>
+      <a class="btn" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=-tn1Xz_4wUqk0utI6goA0uMvCEIQ9XBGuBwkc-mn5odUQVpWQTc5OUJOQjVYNVRSSjlSU1FXNUtDQS4u&amp;origin=QRCode" target="_blank" rel="noopener">Responder cuestionario post-workshop</a>
+    </aside>
+  </div>
+</header>
+
+<main>
+  <section class="block" id="sobre">
+    <div class="wrap">
+      <span class="eyebrow">Sobre el workshop</span>
+      <h2>Datos claros para pensar el rol de la IA</h2>
+      <div class="prose">
+        <p>El workshop reunió a estudiantes de magíster y doctorado en Matemáticas, Estadística e Ingeniería Matemática y Computacional de la Pontificia Universidad Católica de Chile. El objetivo fue entregar elementos concretos para entender qué está cambiando con la IA en la investigación, qué significa en la práctica y qué escenarios se abren.</p>
+        <p>La tarde combinó tres miradas: el panorama económico y el uso práctico, la verificación formal con Lean y la reflexión sobre cómo aprender y trabajar con IA. Cerró con un conversatorio guiado por las preguntas que los propios estudiantes enviaron en el cuestionario previo.</p>
+      </div>
+      <pre class="lean" aria-label="Fragmento de Lean"><span class="k">theorem</span> futuro_de_las_matemáticas (tú : Estudiante) :
+    ¿herramienta ∨ colaborador ∨ competencia? := <span class="k">by</span>
+  <span class="s">sorry</span>  <span class="c">-- la discusión sigue abierta</span></pre>
+    </div>
+  </section>
+
+  <section class="block" id="programa">
+    <div class="wrap">
+      <span class="eyebrow">Programa</span>
+      <h2>Charlas, Lean y conversatorio</h2>
+
+      <div class="talk"><div class="time">14:30 – 14:40</div><div><div class="who">Organización</div><h3>Bienvenida</h3><details><summary>Ver resumen</summary><p>Objetivos del workshop y resultados del cuestionario previo.</p></details></div></div>
+
+      <div class="bloque">
+        <div class="bloque-h"><span>01</span>PANORAMA Y USO PRÁCTICO</div>
+        <div class="talk"><div class="time">14:40 – 15:05</div><div><div class="who">Nicolás Figueroa</div><h3>El impacto de la IA en los mercados laborales y las organizaciones</h3><details><summary>Ver resumen</summary><p>La inteligencia artificial es un shock de productividad con características distintas a otras revoluciones tecnológicas: se adopta más rápido, es transversal a los sectores productivos y su efecto se concentra en los trabajos de entrada. Estos producen, entrenan y seleccionan a la vez, por lo que automatizarlos amenaza la conformación de la organización en el futuro. Sin embargo, la IA automatiza tareas, no necesariamente trabajos: lo decisivo es cuán fuerte la complementariedad entre las tareas que componen una ocupación. Además, las organizaciones son coaliciones con intereses divergentes, donde la autoridad y la responsabilidad siguen siendo humanas. La presentación concluye que el cuello de botella cercano es implementar la IA dentro de las organizaciones, y plantea algunas hipótesis respecto a algunos mercados laborales como el académico.</p></details></div></div>
+        <div class="talk"><div class="time">15:05 – 15:30</div><div><div class="who">Luis Gutiérrez</div><h3>IA en la inferencia bayesiana: usos y posibilidades de desarrollo</h3><details><summary>Ver resumen</summary><p>En esta charla voy a compartir mi experiencia con el uso de la Inteligencia Artificial para la investigación en inferencia bayesiana. En particular, enfatizaré las tareas que delego a la IA y los resultados que he obtenido. Discutiré los cambios que ha experimentado mi investigación, mi visión a corto plazo para la investigación en estadística y la supervisión de estudiantes de postgrado. Además, presentaré las posibilidades que el deep learning y las capacidades de cómputo abren para la inferencia bayesiana, así como la posibilidad de poner a disposición de usuarios no expertos modelos estadísticos complejos.</p></details></div></div>
+        <div class="talk"><div class="time">15:30 – 15:55</div><div><div class="who">Vicente Fernández</div><h3>Del otro lado del modelo</h3><details><summary>Ver resumen</summary><p>Los modelos de lenguaje actuales no solo se entrenan prediciendo texto: se ajustan con aprendizaje por refuerzo, usando preferencias humanas o verificadores automáticos como señal de recompensa. Esta charla repasa la matemática de ese proceso y muestra cómo se producen los datos que lo alimentan: tareas donde especialistas en matemáticas, ciencia e ingeniería diseñan problemas que hacen fallar al modelo y escriben las pautas para corregirlo. Se discute cómo es ese trabajo en la práctica, qué habilidades exige y qué significa para quienes cursan un posgrado.</p></details></div></div>
+        <div class="pausa"><div class="time">15:55 – 16:20</div><div>Pausa café</div></div>
+      </div>
+
+      <div class="bloque">
+        <div class="bloque-h"><span>02</span>FORMALIZACIÓN Y REFLEXIÓN</div>
+        <div class="talk"><div class="time">16:20 – 17:00</div><div><div class="who">Raimundo Briceño</div><h3>Una breve introducción a Lean</h3><details><summary>Ver resumen</summary><p>A partir de ejemplos concretos, veremos cómo escribir y comprobar demostraciones en Lean. Discutiremos también cómo la verificación formal, combinada con la inteligencia artificial, puede cambiar nuestra manera de hacer matemática.</p></details></div></div>
+        <div class="talk"><div class="time">17:00 – 17:25</div><div><div class="who">Cristóbal Rojas</div><h3>Reflexiones y ejemplos sobre el uso de IA en el quehacer académico</h3><details><summary>Ver resumen</summary><p>Plantearé algunas reflexiones sobre este tema y mostraré algunos ejemplos de mi experiencia personal en la incorporación de IA en cómo hacer y comunicar ciencia.</p></details></div></div>
+        <div class="talk"><div class="time">17:25 – 17:50</div><div><div class="who">Mircea Petrache</div><h3>IA, descarga cognitiva, metacognición</h3><details><summary>Ver resumen</summary><p>La IA generativa puede mejorar nuestro desempeño inmediato y, al mismo tiempo, debilitar lo que aprendemos e inflar cuánto creemos entender. A partir de experimentos recientes, internacionales y chilenos, esta charla muestra que el efecto depende de cómo la usamos. Cerraremos con hábitos concretos para trabajar, entre otros, temas de matemática y estadística con IA con «descarga cognitiva positiva».</p></details></div></div>
+        <div class="pausa"><div class="time">17:50 – 18:00</div><div>Pausa breve</div></div>
+      </div>
+
+      <div class="bloque">
+        <div class="bloque-h"><span>03</span>CONVERSATORIO</div>
+        <div class="talk"><div class="time">18:00 – 18:50</div><div><div class="who">Todos los expositores</div><h3>Conversatorio</h3><details><summary>Ver resumen</summary><p>Guiado por las preguntas de los estudiantes en el cuestionario previo.</p></details></div></div>
+        <div class="talk"><div class="time">18:50 – 19:00</div><div><div class="who">Organización</div><h3>Cierre</h3><details><summary>Ver resumen</summary><p>Ideas clave y próximas actividades.</p></details></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="slides">
+    <div class="wrap">
+      <span class="eyebrow">Materiales</span>
+      <h2>Slides de las charlas</h2>
+      <p class="prose">Algunas presentaciones están en PDF y otras son interactivas (HTML, con animaciones). Las que aún no aparecen se irán publicando a medida que los expositores las compartan.</p>
+      <div class="slides-grid" id="slides-grid"></div>
+      <div class="viewer" id="viewer" hidden>
+        <div class="viewer-bar">
+          <strong id="viewer-title">Presentación</strong>
+          <a class="btn-ghost" id="viewer-open" href="#" target="_blank" rel="noopener">Abrir en pestaña nueva</a>
+          <button class="btn-ghost" type="button" id="viewer-close">Cerrar</button>
+        </div>
+        <iframe class="viewer-frame" id="viewer-frame" title="Presentación" loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="resultados">
+    <div class="wrap">
+      <span class="eyebrow">Lo que salió del workshop</span>
+      <h2>Preguntas, ideas y resultados</h2>
+      <div class="cards2">
+        <div class="panel placeholder"><span class="status pending">En preparación</span><h3>Cuestionario previo</h3><p>Cómo usan IA los estudiantes de postgrado, qué les preocupa y qué temas eligieron para el conversatorio. Solo resultados agregados y anónimos.</p></div>
+        <div class="panel placeholder"><span class="status pending">En preparación</span><h3>Conversatorio</h3><p>Las preguntas principales que se discutieron y las ideas que dejaron los expositores.</p></div>
+        <div class="panel placeholder"><span class="status pending">Abierto</span><h3>Cuestionario post-workshop</h3><p>¿Qué te sirvió y qué te gustaría para una próxima edición? <a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=-tn1Xz_4wUqk0utI6goA0uMvCEIQ9XBGuBwkc-mn5odUQVpWQTc5OUJOQjVYNVRSSjlSU1FXNUtDQS4u&amp;origin=QRCode" target="_blank" rel="noopener">Responde aquí</a>.</p></div>
+        <div class="panel placeholder"><span class="status pending">Por anunciar</span><h3>Próximas actividades</h3><p>Grupo de estudio de Lean y un seminario sobre IA en la investigación. Las fechas se publicarán aquí.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="recursos">
+    <div class="wrap">
+      <span class="eyebrow">Para seguir</span>
+      <h2>Recursos y lecturas</h2>
+      <div class="cards2">
+        <div class="panel">
+          <h3>Empezar con Lean</h3>
+          <ul class="res">
+            <li><a href="https://adam.math.hhu.de/#/g/leanprover-community/nng4" target="_blank" rel="noopener">Natural Number Game</a><span>La forma más amable de escribir tus primeras demostraciones en Lean, en el navegador.</span></li>
+            <li><a href="https://leanprover-community.github.io/" target="_blank" rel="noopener">Comunidad de Lean y Mathlib</a><span>Documentación, tutoriales y la biblioteca matemática de Lean.</span></li>
+            <li><a href="https://lean-lang.org/" target="_blank" rel="noopener">Lean</a><span>Sitio oficial del lenguaje.</span></li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Casos y debates recientes</h3>
+          <ul class="res">
+            <li><a href="https://1stproof.org" target="_blank" rel="noopener">First Proof</a><span>Problemas de investigación no publicados para evaluar a la IA, con resultados mixtos.</span></li>
+            <li><a href="https://www.erdosproblems.com" target="_blank" rel="noopener">Problemas de Erdős</a><span>Problemas abiertos resueltos con IA: éxitos, redescubrimientos y polémicas.</span></li>
+            <li><a href="https://arxiv.org/abs/2511.02864" target="_blank" rel="noopener">Mathematical exploration and discovery at scale</a><span>Georgiev, Gómez-Serrano, Tao y Wagner: AlphaEvolve en 67 problemas.</span></li>
+            <li><a href="https://arxiv.org/abs/2512.10220" target="_blank" rel="noopener">Monotonía de curvas de aprendizaje</a><span>Un problema abierto de teoría estadística resuelto con IA, y sus matices.</span></li>
+            <li><a href="https://arxiv.org/abs/2601.17510" target="_blank" rel="noopener">“Rebuilding” Statistics in the Age of AI</a><span>Panel sobre el futuro de la estadística frente a la IA.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Facultad de Matemáticas · Instituto de Ingeniería Matemática y Computacional · Pontificia Universidad Católica de Chile</strong></p>
+    <p>Gracias a Raimundo Briceño, Vicente Fernández, Nicolás Figueroa, Luis Gutiérrez, Mircea Petrache y Cristóbal Rojas, y a todas las personas que participaron.</p>
+    <p>Contacto: <span class="mono">[correo de la organización]</span></p>
+  </div>
+</footer>
+
+<script>
+/* Edit this list to publish slides.
+   type: "pdf" | "html" | "pending" (not yet shared) | "none" (will not be shared)
+   url: relative path of a file published with the page (e.g. "slides/figueroa.pdf") or a full https:// link. */
+const SLIDES = [
+  { who: "Nicolás Figueroa",  title: "El impacto de la IA en los mercados laborales y las organizaciones", type: "pending", url: "" },
+  { who: "Luis Gutiérrez",    title: "IA en la inferencia bayesiana: usos y posibilidades de desarrollo", type: "pending", url: "" },
+  { who: "Vicente Fernández", title: "Del otro lado del modelo", type: "pending", url: "" },
+  { who: "Raimundo Briceño",  title: "Una breve introducción a Lean", type: "pending", url: "" },
+  { who: "Cristóbal Rojas",   title: "Reflexiones y ejemplos sobre el uso de IA en el quehacer académico", type: "pending", url: "" },
+  { who: "Mircea Petrache",   title: "IA, descarga cognitiva, metacognición", type: "pending", url: "" }
+];
+const LABEL = { pdf: "PDF", html: "Interactiva (HTML)", pending: "Por publicar", none: "No disponible" };
+const NOTE = {
+  pending: "Se publicará cuando el expositor la comparta.",
+  none: "El expositor no compartirá esta presentación."
+};
+const grid = document.getElementById('slides-grid');
+const viewer = document.getElementById('viewer');
+const frame = document.getElementById('viewer-frame');
+const vTitle = document.getElementById('viewer-title');
+const vOpen = document.getElementById('viewer-open');
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
+
+SLIDES.forEach((s, i) => {
+  const ready = (s.type === 'pdf' || s.type === 'html') && s.url;
+  const type = ready ? s.type : (s.type === 'none' ? 'none' : 'pending');
+  const card = el('article', 'slide-card');
+  card.append(el('span', 'status ' + type, LABEL[type]));
+  card.append(el('div', 'who', s.who));
+  card.append(el('h3', null, s.title));
+  const actions = el('div', 'actions');
+  if (ready) {
+    const isLocal = !/^https?:/i.test(s.url);
+    if (type === 'html' && isLocal) {
+      const b = el('button', 'btn-ghost', 'Ver aquí');
+      b.type = 'button';
+      b.addEventListener('click', () => {
+        frame.src = s.url; vTitle.textContent = s.who + ' · ' + s.title; vOpen.href = s.url;
+        viewer.hidden = false; viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      actions.append(b);
+    }
+    const a = el('a', 'btn-ghost', type === 'pdf' ? 'Abrir PDF' : 'Abrir en pestaña nueva');
+    a.href = s.url; a.target = '_blank'; a.rel = 'noopener';
+    actions.append(a);
+  } else {
+    actions.append(el('p', 'note', NOTE[type]));
+  }
+  card.append(actions);
+  grid.append(card);
+});
+
+document.getElementById('viewer-close').addEventListener('click', () => {
+  viewer.hidden = true; frame.removeAttribute('src');
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+Carpeta para las presentaciones.
+
+PDF: copie aquí el archivo, por ejemplo slides/figueroa.pdf
+HTML con animaciones: cree una subcarpeta por charla con todos sus archivos,
+por ejemplo slides/petrache/index.html (más sus imágenes y scripts).
+
+Después, en index.html, busque la lista SLIDES (al final del archivo) y cambie
+la línea de esa charla, por ejemplo:
+  type: "pdf",  url: "slides/figueroa.pdf"
+  type: "html", url: "slides/petrache/index.html"
+Si un expositor no compartirá su presentación, use  type: "none".
